@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Node.js MongoDB Додаток</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <style>
+        body {
+            background-color: #6d6d6d;
+            font-family: 'Arial', sans-serif;
+        }
+        .container {
+            margin-top: 20px;
+        }
+        .form-container {
+            display: none;
+            margin-bottom: 20px;
+            padding: 20px;
+            background-color: #ffffff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .btn-custom {
+            display: block;
+            width: 100%;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        .btn-success-custom {
+            background-color: #af9cab;
+            border-color: #af9cab;
+        }
+        .btn-danger-custom {
+            background-color: #af9cab;
+            border-color: #af9cab;
+        }
+        .btn-warning-custom {
+            background-color: #af9cab;
+            border-color: #af9cab;
+        }
+        .btn-secondary-custom {
+            background-color: #6c757d;
+            border-color: #6c757d;
+        }
+        .table-container {
+            margin-top: 20px;
+            background-color: #ffffff;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .form-title {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            font-weight: bold;
+        }
+        .btn-block-custom {
+            width: 100%;
+        }
+        .thead-custom {
+            background-color: #343a40;
+            color: #fff;
+        }
+        .table-hover tbody tr:hover {
+            background-color: #f1f1f1;
+        }
+        .alert-custom {
+            background-color: #dff0d8;
+            color: #3c763d;
+            border: 1px solid #d6e9c6;
+            padding: 10px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="table-container">
+            <h2 class="form-title">Список користувачів</h2>
+            <table class="table table-hover table-bordered">
+                <thead class="thead-custom">
+                    <tr>
+                        <th>ID</th>
+                        <th>Ім'я</th>
+                        <th>Вік</th>
+                        <th>Опції</th>
+                    </tr>
+                </thead>
+                <tbody id="usersBody">
+                    <!-- Сюди будуть додаватися рядки користувачів -->
+                </tbody>
+            </table>
+        </div>
+
+        <div class="form-container" id="addUserForm">
+            <h2 class="form-title">Додати користувача</h2>
+            <form action="/adduser" method="post">
+                <div class="form-group">
+                    <label for="name">Ім'я:</label>
+                    <input type="text" id="name" name="name" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="age">Вік:</label>
+                    <input type="number" id="age" name="age" class="form-control" required>
+                </div>
+                <button type="submit" class="btn btn-sm btn-success-custom btn-block-custom">Додати</button>
+                <button type="button" class="btn btn-sm btn-secondary-custom btn-block-custom" onclick="resetForm('addUserForm')">Скинути</button>
+            </form>
+        </div>
+
+        <div class="form-container" id="deleteUserForm">
+            <h2 class="form-title">Видалити користувача</h2>
+            <form action="/deleteuser" method="post">
+                <div class="form-group">
+                    <label for="deleteId">ID користувача:</label>
+                    <input type="text" id="deleteId" name="id" class="form-control" required>
+                </div>
+                <button type="submit" class="btn btn-sm btn-danger-custom btn-block-custom">Видалити</button>
+            </form>
+        </div>
+
+        <div class="form-container" id="updateUserForm">
+            <h2 class="form-title">Змінити інформацію користувача</h2>
+            <form action="/updateuser" method="post">
+                <div class="form-group">
+                    <label for="updateId">ID користувача:</label>
+                    <input type="text" id="updateId" name="id" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="newName">Нове ім'я:</label>
+                    <input type="text" id="newName" name="name" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="newAge">Новий вік:</label>
+                    <input type="number" id="newAge" name="age" class="form-control" required>
+                </div>
+                <button type="submit" class="btn btn-sm btn-warning-custom btn-block-custom">Змінити</button>
+            </form>
+        </div>
+
+        <div class="row">
+            <div class="col-md-4">
+                <button onclick="toggleForm('addUserForm')" class="btn btn-sm btn-success-custom btn-custom">Додати користувача</button>
+            </div>
+            <div class="col-md-4">
+                <button onclick="toggleForm('deleteUserForm')" class="btn btn-sm btn-danger-custom btn-custom">Видалити користувача</button>
+            </div>
+            <div class="col-md-4">
+                <button onclick="toggleForm('updateUserForm')" class="btn btn-sm btn-warning-custom btn-custom">Змінити інформацію користувача</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS і користувацький JS -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            // Початкове завантаження користувачів після завантаження документу
+            fetchUsers();
+        });
+
+        // Функція для перемикання видимості форм
+        function toggleForm(formId) {
+            $('.form-container').hide(); // Сховати всі форми
+            $('#' + formId).toggle(); // Перемикати конкретну форму
+        }
+
+        // Функція для скидання полів форми
+        function resetForm(formId) {
+            document.getElementById(formId).reset();
+        }
+
+        // Функція для отримання користувачів і заповнення таблиці
+        function fetchUsers() {
+            fetch("/users")
+                .then(response => response.json())
+                .then(data => {
+                    let usersBody = document.getElementById("usersBody");
+                    usersBody.innerHTML = "";
+                    data.forEach(user => {
+                        usersBody.innerHTML += `
+                            <tr>
+                                <td>${user._id}</td>
+                                <td>${user.name}</td>
+                                <td>${user.age}</td>
+                                <td>
+                                    <button class="btn btn-sm btn-info" onclick="copyToClipboard('${user._id}')">Копіювати ID</button>
+                                </td>
+                            </tr>
+                        `;
+                    });
+                });
+        }
+
+        // Функція для копіювання ID користувача в буфер обміну
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text)
+                .then(() => {
+                    alert(`ID "${text}" скопійовано в буфер обміну!`);
+                })
+                .catch(err => {
+                    console.error('Не вдалося скопіювати текст: ', err);
+                });
+        }
+    </script>
+</body>
+</html>
